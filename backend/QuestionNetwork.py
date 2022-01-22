@@ -22,7 +22,18 @@ class QuestionNetwork():
     return tree
 
   def network_to_JSON_format(self):
-    return self.head.to_JSON_format()
+
+    def recursive_search(node, connections): 
+      for child in node.children: 
+        connections.append({"source":node.value.id, "target":child.value.id})
+
+    connections = []
+    recursive_search(self.head, connections)
+
+    return {
+      "links" : connections,
+      "nodes" : [node.parent.to_JSON_format() for node in self.all_questions.values()] 
+    }
 
   def get_potential_link(self, text): 
     
