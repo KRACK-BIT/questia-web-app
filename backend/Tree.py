@@ -25,7 +25,7 @@ class Tree():
   def to_JSON_format(self): # -> Dict[id, text, size, children : Dict[...]]
     value = self.value
     children = self.children
-    if self.type == Topic: 
+    if self.type == "Topic": 
       return { 
         "type" : "Topic",
         "id" : value.id,
