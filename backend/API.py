@@ -3,7 +3,7 @@ from flask_cors import CORS
 from QuestionNetwork import QuestionNetwork
 
 # configuration
-DEBUG = True
+DEBUG = True  
 
 
 head = "Forces"
