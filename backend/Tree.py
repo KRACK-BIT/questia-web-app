@@ -41,3 +41,8 @@ class Tree():
         "children" : [child.to_JSON_format() for child in children]
       }
 
+  def pprint(self):
+    if self.type == "Topic":
+      print("  " * self.level + f"Type: {self.type} Text: {self.value.text} Level: {self.level}")
+    else:
+      print("  " * self.level + f"Type: {self.type} Text: {self.value.text} Level: {self.level} Votes: {self.value.votes}")
