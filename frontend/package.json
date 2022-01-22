@@ -1,7 +1,7 @@
 {
-  "name": "question-mesh",
+  "name": "questia",
   "version": "1.0.0",
-  "private": true,
+  "private": false,
   "scripts": {
     "dev": "nuxi dev",
     "build": "nuxi build",
