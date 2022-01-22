@@ -1,18 +1,7 @@
 from __future__ import annotations
-from typing import List 
-from flask import jsonify
-import uuid
-
-class Topic(): 
-  def __init__(self, text: str):
-    self.id: int = uuid.uuid1().int 
-    self.text = text
-
-class Question():
-  def __init__(self, text: str):
-    self.id: int = uuid.uuid1().int
-    self.text: str = text
-    self.votes: int = 1
+from typing import List
+from Topic import Topic 
+from Question import Question 
 
 class Tree():
   def __init__(self, value: Question | Topic, level: int) -> None:
@@ -26,10 +15,10 @@ class Tree():
     self.children: List[Tree] = []
     self.level: int = level
 
-  def add_node(self, node: Tree) -> None:
+  def add_child(self, node: Tree) -> None:
     self.children.append(node)
 
-  def add_node_list(self, node_list: List[Tree]) -> None:
+  def add_child_list(self, node_list: List[Tree]) -> None:
     for node in node_list: 
       self.children.append(node)
 
