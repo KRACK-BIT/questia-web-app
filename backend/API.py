@@ -4,7 +4,10 @@ import QuestionNetwork
 
 # configuration
 DEBUG = True
-question_network = QuestionNetwork.QuestionNetwork()
+
+head = "Forces"
+children = ["Definitions", "Newton's Forces", "Other"]
+question_network = QuestionNetwork.QuestionNetwork(head, children)
 print(question_network.network_to_JSON_format())
 
 # instantiate the app
@@ -18,6 +21,15 @@ CORS(app, resources={r'/*': {'origins': '*'}})
 @app.route('/get-tree', methods=['GET'])
 def get_tree():
   return jsonify(question_network.network_to_JSON_format()) 
+
+@app.route('/get-potential-link', method=['POST'])
+def get_potential_link(text):
+  question_network.get_potential_link(text)
+
+@app.route('/confirm-link', method=['PUT'])
+def confirm_link(text, link):
+  question_network.add_question(text, link)
+
 
 """
 # get questions tree
