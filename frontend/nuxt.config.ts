@@ -12,6 +12,16 @@ export default defineNuxtConfig({
   // Auto import components: https://go.nuxtjs.dev/config-components
   components: true,
 
+  buildModules: [
+    [
+      'unplugin-auto-import/nuxt',
+      {
+        imports: ['@nuxtjs/composition-api'],
+        dts: './auto-imports.generated.d.ts',
+      },
+    ],
+  ],
+
   // Modules: https://go.nuxtjs.dev/config-modules
   modules: [
     // https://go.nuxtjs.dev/buefy
@@ -36,4 +46,8 @@ export default defineNuxtConfig({
 
   // Build Configuration: https://go.nuxtjs.dev/config-build
   build: {},
+
+  bridge: {
+    vite: true,
+  },
 })
