@@ -6,7 +6,7 @@ export default defineNuxtConfig({
 
   // Global page headers: https://go.nuxtjs.dev/config-head
   head: {
-    title: 'question-mesh',
+    title: 'Questia',
   },
 
   // Auto import components: https://go.nuxtjs.dev/config-components
