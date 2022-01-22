@@ -1,4 +1,4 @@
-class KeyWordLink():
+class KeywordMatch():
   def __init__(self):
     pass
 
