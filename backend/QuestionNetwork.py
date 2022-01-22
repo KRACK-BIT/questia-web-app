@@ -1,10 +1,12 @@
 from KeywordMatch import KeywordMatch
-from Tree import Tree, Topic, Question
+from Tree import Tree
+from Topic import Topic 
+from Question import Question 
 class QuestionNetwork(): 
   def __init__(self, head, children):
     self.keyword_matcher = KeywordMatch()
-    self.head = self.text_to_topic(head, 0)
-    self.head.add_child_list([self.text_to_topic(child, 1) for child in children])
+    self.head = self.text_to_topic_tree_object(head, 0)
+    self.head.add_child_list([self.text_to_topic_tree_object(child, 1) for child in children])
     self.all_questions = {}
 
   def text_to_topic_tree_object(self, text: str, level: int) -> Tree:
@@ -25,12 +27,18 @@ class QuestionNetwork():
   def get_potential_link(self, text): 
     
     def search_for_link(node):
-      question = node.question
-      if node.type == "Question" and self.keyword_matcher.find_keyword_match(text, question.text): 
-        return question.id
+      if not node:
+        return False
+
+      value = node.value
+      if node.type == "Question" and self.keyword_matcher.find_keyword_match(text, value.text): 
+        return value.id
       else:
         for child in node.children:
-          search_for_link(child)
+          search_result = search_for_link(child)
+          if search_result:
+            return search_result
+        return False 
 
     return search_for_link(self.head)
   
