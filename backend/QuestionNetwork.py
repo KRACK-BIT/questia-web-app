@@ -7,7 +7,7 @@ class QuestionNetwork():
     self.keyword_matcher = KeywordMatch()
     self.head = self.text_to_topic_tree_object(head, 0)
     self.head.add_child_list([self.text_to_topic_tree_object(child, 1) for child in children])
-    self.all_questions = {}
+    self.all_questions = {child.value.id : child.value for child in self.head.children}
 
   def text_to_topic_tree_object(self, text: str, level: int) -> Tree:
     topic = Topic(text)
@@ -16,13 +16,24 @@ class QuestionNetwork():
     return tree 
 
   def text_to_question_tree_object(self, text: str, level: int) -> Tree:
-    topic = Question(text), level
+    topic = Question(text)
     tree = Tree(topic, level)
     topic.add_parent(tree)
     return tree
 
   def network_to_JSON_format(self):
-    return self.head.to_JSON_format()
+
+    def recursive_search(node, connections): 
+      for child in node.children: 
+        connections.append({"source":node.value.id, "target":child.value.id})
+
+    connections = []
+    recursive_search(self.head, connections)
+
+    return {
+      "links" : connections,
+      "nodes" : [node.parent.to_JSON_format() for node in self.all_questions.values()] 
+    }
 
   def get_potential_link(self, text): 
     
@@ -48,4 +59,12 @@ class QuestionNetwork():
   def add_question(self, text, link_id): 
     link_val = self.all_questions[link_id]
     link_node = link_val.parent
-    link_node.add_child(self.text_to_question_tree_object(text, link_val.level + 1))
+    link_node.add_child(self.text_to_question_tree_object(text, link_node.level + 1))
+
+  def pprint(self):
+    def pprint_recurse(node):
+      node.pprint()
+      for child in node.children: 
+        pprint_recurse(child)
+
+    pprint_recurse(self.head)

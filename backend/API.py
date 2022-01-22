@@ -5,10 +5,24 @@ from QuestionNetwork import QuestionNetwork
 # configuration
 DEBUG = True
 
+
 head = "Forces"
 children = ["Definitions", "Newton's Forces", "Other"]
 question_network = QuestionNetwork(head, children)
+
+"""
 print(question_network.network_to_JSON_format())
+print("\n" * 4)
+question_network.pprint()
+print("\n" * 4)
+
+print("\n" * 4)
+question_network.add_question("What are forces", question_network.head.children[1].value.id)
+question_network.pprint()
+print("\n" * 5)
+
+print(question_network.network_to_JSON_format())
+"""
 
 # instantiate the app
 app = Flask(__name__)
@@ -34,8 +48,8 @@ def confirm_link(request):
 
 @app.route('/vote-for-question', methods=['PUT'])
 def vote_for_question(request): 
-  json = request.get_json() 
-  question_network.vote_for_question(json["question_id"])
+  json = request.get_json()
+  question_network.upvote_question(json["question_id"])
 
 if __name__ == '__main__':
     app.run()

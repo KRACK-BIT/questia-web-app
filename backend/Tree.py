@@ -22,6 +22,23 @@ class Tree():
     for node in node_list: 
       self.children.append(node)
 
+  def to_JSON_format(self):
+    value = self.value
+    if self.type == "Topic": 
+      return { 
+        "id" : value.id,
+        "type" : "Topic",
+        "text" : value.text
+      }
+    else:
+      return { 
+        "id" : value.id,
+        "type" : "Question",
+        "text" : value.text,
+        "size" : value.votes
+      }
+
+  """
   def to_JSON_format(self): # -> Dict[id, text, size, children : Dict[...]]
     value = self.value
     children = self.children
@@ -40,4 +57,10 @@ class Tree():
         "size" : value.votes,
         "children" : [child.to_JSON_format() for child in children]
       }
+  """
 
+  def pprint(self):
+    if self.type == "Topic":
+      print("  " * self.level + f"Type: {self.type} Text: {self.value.text} Level: {self.level}")
+    else:
+      print("  " * self.level + f"Type: {self.type} Text: {self.value.text} Level: {self.level} Votes: {self.value.votes}")
