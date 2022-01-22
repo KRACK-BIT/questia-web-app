@@ -1,10 +1,13 @@
 from flask import Flask, jsonify
 from flask_cors import CORS
-import QuestionNetwork
+from QuestionNetwork import QuestionNetwork
 
 # configuration
 DEBUG = True
-question_network = QuestionNetwork.QuestionNetwork()
+
+head = "Forces"
+children = ["Definitions", "Newton's Forces", "Other"]
+question_network = QuestionNetwork(head, children)
 print(question_network.network_to_JSON_format())
 
 # instantiate the app
@@ -19,17 +22,17 @@ CORS(app, resources={r'/*': {'origins': '*'}})
 def get_tree():
   return jsonify(question_network.network_to_JSON_format()) 
 
-"""
-# get questions tree
-@app.route('/send-question', methods=['GET'])
-def send_question():
-    return jsonify('ping')
+@app.route('/get-potential-link', method=['POST'])
+def get_potential_link(text):
+  question_network.get_potential_link(text)
 
-# get questions tree
-@app.route('/send-upvote', methods=[''])
-def send_upvote():
-    return jsonify('ping')
-"""
+@app.route('/confirm-link', method=['PUT'])
+def confirm_link(text, link):
+  question_network.add_question(text, link)
+
+@app.route('/vote-for-question', method=['PUT'])
+def vote_for_question(question_id): 
+  question_network.vote_for_question(question_id)
 
 if __name__ == '__main__':
     app.run()
