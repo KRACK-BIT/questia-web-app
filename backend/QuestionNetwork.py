@@ -24,10 +24,10 @@ class QuestionNetwork:
         topic.add_parent(tree)
         return tree
 
-    def text_to_question_tree_object(self, text: str, level: int) -> Tree:
+    def text_to_question_tree_object(self, text: str, level: int, parent) -> Tree:
         topic = Question(self.current_id, text)
         self.current_id += 1
-        tree = Tree(topic, level)
+        tree = Tree(topic, level, parent)
         topic.add_parent(tree)
         return tree
 
@@ -57,9 +57,7 @@ class QuestionNetwork:
                 return False
 
             value = node.value
-            if node.type == "Question" and self.keyword_matcher.find_keyword_match(
-                text, value.text
-            ):
+            if self.keyword_matcher.find_keyword_match(text, value.text):
                 return value.id
             else:
                 for child in node.children:
@@ -68,17 +66,21 @@ class QuestionNetwork:
                         return search_result
                 return False
 
-        return search_for_link(self.head)
+        x = search_for_link(self.head)
+        if x:
+            return x
+        else:
+            return self.head.value.id
 
     def upvote_question(self, question_id):
         self.all_questions[question_id] += 1
 
     def add_question(self, text, link_id):
         link_val = self.all_questions[link_id]
-        link_node = link_val.parent
-        link_node.add_child(
-            self.text_to_question_tree_object(text, link_node.level + 1)
-        )
+        link_node = link_val.value
+        x = self.text_to_question_tree_object(text, link_val.level + 1, link_val)
+        link_val.add_child(x)
+        self.all_questions[x.value.id] = x.value
 
     def pprint(self):
         def pprint_recurse(node):

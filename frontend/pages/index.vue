@@ -3,7 +3,7 @@
     <b-navbar style="background-color: #765ad8">
       <template #brand>
         <b-navbar-item>
-          <img src="../static/icon.png" style="margin: 10px" />
+          <img src="/icon.png" style="margin: 10px" />
           <h1 class="title" style="color: white"><b>Questia</b></h1>
         </b-navbar-item>
       </template>
@@ -33,23 +33,23 @@
         <div class="section">
           <div style="text-align: center; margin: 15px">
             <b-field label="Question">
-              <b-input></b-input>
+              <b-input v-model="questionInput"></b-input>
             </b-field>
           </div>
           <div style="margin: 15px">
             <b-field>
-              <b-button>Submit Question</b-button>
+              <b-button @click="submitQuestion">Submit Question</b-button>
             </b-field>
           </div>
           <div style="margin: 15px">
             <p v-if="isLink === 1">
               This question looks very similar to: {{ linkQuestion }}. Is your
-              question seperate, linked or a duplicate?
+              question separate, linked or a duplicate?
             </p>
           </div>
           <div v-if="isLink" style="margin: 15px">
             <b-field>
-              <b-button>Seperate</b-button>
+              <b-button>Separate</b-button>
               <b-button>Linked</b-button>
               <b-button>Duplicate</b-button>
             </b-field>
@@ -134,8 +134,6 @@ interface Node extends d3.SimulationNodeDatum {
   text: string
   x: number
   y: number
-  answered: boolean
-  answer: string
 }
 
 interface NodeLink extends d3.SimulationLinkDatum<Node> {
@@ -145,44 +143,14 @@ interface NodeLink extends d3.SimulationLinkDatum<Node> {
 
 const answerQuestion = () => {
   if (selectedNode.value) {
-    selectedNode.value.answered = true
-    selectedNode.value.answer = 'answer'
+    // selectedNode.value.answered = true
+    // selectedNode.value.answer = 'answer'
   }
 }
 
-const nodes: Node[] = reactive([
-  {
-    id: 1,
-    text: 'What is five plus five?',
-    x: 0,
-    y: 0,
-    answered: false,
-    answer: '',
-  },
-  {
-    id: 2,
-    text: 'What is ten plus five?',
-    x: 0,
-    y: 0,
-    answered: false,
-    answer: '',
-  },
-  {
-    id: 3,
-    text: 'What is life?',
-    x: 0,
-    y: 0,
-    answered: false,
-    answer: '',
-  },
-])
+const nodes: Node[] = reactive([])
 
-const links: d3.SimulationLinkDatum<Node>[] = reactive([
-  {
-    source: 1,
-    target: 2,
-  },
-])
+const links: d3.SimulationLinkDatum<Node>[] = reactive([])
 
 let simulation: d3.Simulation<Node, NodeLink>
 let link: d3.Selection<
@@ -402,6 +370,22 @@ onMounted(async () => {
   window.setInterval(fetchState, 500)
   await fetchState()
 })
+
+const questionInput = ref('')
+const submitQuestion = async () => {
+  const { id } = await $axios.$post('/api/get-potential-link', {
+    text: questionInput.value,
+  })
+  if (id === false) {
+  } else {
+    console.log('AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA')
+    console.log(questionInput.value)
+    await $axios.$put('/api/confirm-link', {
+      text: questionInput.value,
+      link: id,
+    })
+  }
+}
 </script>
 
 <style>
@@ -470,4 +454,3 @@ html {
   flex-direction: column;
 }
 </style>
-
