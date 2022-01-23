@@ -126,6 +126,7 @@ const isTeacher = ref(1)
 interface ServerNode {
   id: number
   text: string
+  topic: string
 }
 
 interface Node extends d3.SimulationNodeDatum {
@@ -358,42 +359,49 @@ onMounted(() => {
   d3.select(window).on(`resize.${container.attr('id')}`, resize)
 })
 
-
 const page = ref(1)
+
+const $axios = useNuxtApp().$axios as NuxtAxiosInstance
+
 const getLinksAndNodes = async () => {
-  const $axios = useNuxtApp().$axios as NuxtAxiosInstance
-  const { links, nodes: serverNodes } = (await $axios.get('/api/get-tree')) as {
+  const { links, nodes: serverNodes } = (await $axios.$get(
+    '/api/get-tree'
+  )) as {
     links: d3.SimulationLinkDatum<Node>[]
     nodes: ServerNode[]
   }
-  const nodes = serverNodes.map((serverNode) => {
+  const nodes = serverNodes.map(({ id, text }) => {
     return {
       x: 0,
       y: 0,
-      ...serverNode,
+      id,
+      text,
     }
   })
   return { links, nodes }
 }
 
-onMounted(() =>
-  window.setTimeout(async () => {
-    const { links: latestLinks, nodes: latestNodes } = await getLinksAndNodes()
-    const newNodes = latestNodes.filter(
-      (node) => !nodes.some((n) => n.id === node.id)
-    )
-    const newLinks = latestLinks.filter(
-      (link) =>
-        !links.some(
-          (l) =>
-            getId(l.source) === getId(link.source) &&
-            getId(l.target) === getId(link.target)
-        )
-    )
-    nodes.push(...newNodes)
-    links.push(...newLinks)
-  }, 500)
-)
+const fetchState = async () => {
+  const { links: latestLinks, nodes: latestNodes } = await getLinksAndNodes()
+  const newNodes = latestNodes.filter(
+    (node) => !nodes.some((n) => n.id === node.id)
+  )
+  const newLinks = latestLinks.filter(
+    (link) =>
+      !links.some(
+        (l) =>
+          getId(l.source) === getId(link.source) &&
+          getId(l.target) === getId(link.target)
+      )
+  )
+  nodes.push(...newNodes)
+  links.push(...newLinks)
+}
+
+onMounted(async () => {
+  window.setInterval(fetchState, 500)
+  await fetchState()
+})
 </script>
 
 <style>
