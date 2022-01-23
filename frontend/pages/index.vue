@@ -11,14 +11,21 @@
 import * as d3 from 'd3'
 import { forceSimulation, forceCenter } from 'd3-force'
 
+import type { NuxtAxiosInstance } from '@nuxtjs/axios'
+
 const graph = ref<HTMLBodyElement | null>(null)
 
 const linkRadius = 100
 const deleteRadius = 10
 
+interface ServerNode {
+  id: number
+  text: string
+}
+
 interface Node extends d3.SimulationNodeDatum {
   id: number
-  question: string
+  text: string
   x: number
   y: number
 }
@@ -31,19 +38,19 @@ interface NodeLink extends d3.SimulationLinkDatum<Node> {
 const nodes: Node[] = reactive([
   {
     id: 1,
-    question: 'What is five plus five?',
+    text: 'What is five plus five?',
     x: 0,
     y: 0,
   },
   {
     id: 2,
-    question: 'What is ten plus five?',
+    text: 'What is ten plus five?',
     x: 0,
     y: 0,
   },
   {
     id: 3,
-    question: 'What is life?',
+    text: 'What is life?',
     x: 0,
     y: 0,
   },
@@ -95,7 +102,7 @@ const modifyNode = (event: MouseEvent) => {
 
     nodes.push({
       id: newId,
-      question: `Node ${newId}`,
+      text: `Question ${newId}`,
       x: x,
       y: y,
     })
@@ -130,7 +137,7 @@ const updateNodes = () => {
         .append('text')
         .attr('x', 8)
         .attr('y', '0.31em')
-        .text((d) => d.question)
+        .text((d) => d.text)
         .clone(true)
         .lower()
         .attr('fill', 'none')
@@ -202,7 +209,7 @@ onMounted(() => {
     .append('text')
     .attr('x', 8)
     .attr('y', '0.31em')
-    .text((d) => d.question)
+    .text((d) => d.text)
     .clone(true)
     .lower()
     .attr('fill', 'none')
@@ -250,6 +257,41 @@ onMounted(() => {
   resize()
   d3.select(window).on(`resize.${container.attr('id')}`, resize)
 })
+
+const getLinksAndNodes = async () => {
+  const $axios = useNuxtApp().$axios as NuxtAxiosInstance
+  const { links, nodes: serverNodes } = (await $axios.get('/api/get-tree')) as {
+    links: d3.SimulationLinkDatum<Node>[]
+    nodes: ServerNode[]
+  }
+  const nodes = serverNodes.map((serverNode) => {
+    return {
+      x: 0,
+      y: 0,
+      ...serverNode,
+    }
+  })
+  return { links, nodes }
+}
+
+onMounted(() =>
+  window.setTimeout(async () => {
+    const { links: latestLinks, nodes: latestNodes } = await getLinksAndNodes()
+    const newNodes = latestNodes.filter(
+      (node) => !nodes.some((n) => n.id === node.id)
+    )
+    const newLinks = latestLinks.filter(
+      (link) =>
+        !links.some(
+          (l) =>
+            getId(l.source) === getId(link.source) &&
+            getId(l.target) === getId(link.target)
+        )
+    )
+    nodes.push(...newNodes)
+    links.push(...newLinks)
+  }, 500)
+)
 </script>
 
 <style>
