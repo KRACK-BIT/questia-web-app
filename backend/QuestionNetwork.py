@@ -47,6 +47,7 @@ class QuestionNetwork:
                     for node in self.all_questions.values()
                     if node.parent
                 ],
+                self.head.to_JSON_format(),
             ],
         }
 
