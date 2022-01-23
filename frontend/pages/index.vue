@@ -1,31 +1,145 @@
 <template>
-  <div
-    class="whole-screen"
-    ref="graph"
-    @click="modifyNode"
-    @mousemove="mouseMove"
-  />
+  <div class="page">
+    <b-navbar style="background-color: #765ad8">
+      <template #brand>
+        <b-navbar-item>
+          <img src="../static/icon.png" style="margin: 10px" />
+          <h1 class="title" style="color: white"><b>Questia</b></h1>
+        </b-navbar-item>
+      </template>
+    </b-navbar>
+    <div class="body">
+      <div class="side-panel">
+        <b-sidebar position="static" open type="is-light">
+          <div class="p-4">
+            <b-menu class="menu">
+              <b-menu-list>
+                <b-menu-item
+                  label="Submit question"
+                  @click="() => (page = 1)"
+                  :active="page === 1"
+                />
+                <b-menu-item
+                  label="View questions"
+                  @click="() => (page = 2)"
+                  :active="page === 2"
+                />
+              </b-menu-list>
+            </b-menu>
+          </div>
+        </b-sidebar>
+      </div>
+      <div v-if="page === 1" class="enter-question">
+        <div class="section">
+          <div style="text-align: center; margin: 15px">
+            <b-field label="Question">
+              <b-input></b-input>
+            </b-field>
+          </div>
+          <div style="margin: 15px">
+            <b-field>
+              <b-button>Submit Question</b-button>
+            </b-field>
+          </div>
+          <div style="margin: 15px">
+            <p v-if="isLink === 1">
+              This question looks very similar to: {{ linkQuestion }}. Is your
+              question seperate, linked or a duplicate?
+            </p>
+          </div>
+          <div v-if="isLink" style="margin: 15px">
+            <b-field>
+              <b-button>Seperate</b-button>
+              <b-button>Linked</b-button>
+              <b-button>Duplicate</b-button>
+            </b-field>
+          </div>
+        </div>
+      </div>
+      <div v-show="page === 2" class="view-questions">
+        <div
+          class="whole-screen"
+          ref="graph"
+          @click="modifyNode"
+          @mousemove="mouseMove"
+        />
+        <b-modal v-if="isTeacher" v-model="modalActive">
+          <modal-form>
+            <form action="">
+              <div class="modal-card" style="width: auto">
+                <header
+                  class="modal-card-head"
+                  style="display: flex; flex-direction: column"
+                >
+                  <div>
+                    <p class="modal-card-title" style="margin: 15px">
+                      Answer Question:
+                    </p>
+                    <b-field>
+                      <b-input> </b-input>
+                    </b-field>
+                  </div>
+                  <b-button
+                    type="button"
+                    style="margin: 10px"
+                    @click="answerQuestion"
+                    >Submit Answer</b-button
+                  >
+                </header>
+              </div>
+            </form>
+          </modal-form>
+        </b-modal>
+        <b-modal v-if="!isTeacher" v-model="modalActive">
+          <modal-form>
+            <form action="">
+              <div class="modal-card" style="width: auto">
+                <header class="modal-card-head">
+                  <p class="modal-card-title">Answer: {{}}</p>
+                </header>
+              </div>
+            </form>
+          </modal-form>
+        </b-modal>
+      </div>
+      <div v-if="page === 3" class="view-transcript"></div>
+    </div>
+  </div>
 </template>
 
 <script setup lang="ts">
 import * as d3 from 'd3'
 import { forceSimulation, forceCenter } from 'd3-force'
 
-const graph = ref<HTMLBodyElement | null>(null)
+const graph = ref<HTMLDivElement | null>(null)
 
 const linkRadius = 100
-const deleteRadius = 10
+const deleteRadius = 20
+const modalActive = ref(false)
+const selectedNode = ref<Node | null>(null)
+const isLink = ref(0)
+const linkQuestion = ref('What are forces?')
+const isTeacher = ref(1)
 
 interface Node extends d3.SimulationNodeDatum {
   id: number
   question: string
   x: number
   y: number
+  answered: boolean
+  answer: string
 }
 
 interface NodeLink extends d3.SimulationLinkDatum<Node> {
   source: Node
   target: Node
+}
+
+const answerQuestion = () => {
+  if (selectedNode.value) {
+    selectedNode.value.answered = true
+    selectedNode.value.answer = 'answer'
+  }
 }
 
 const nodes: Node[] = reactive([
@@ -34,18 +148,24 @@ const nodes: Node[] = reactive([
     question: 'What is five plus five?',
     x: 0,
     y: 0,
+    answered: false,
+    answer: '',
   },
   {
     id: 2,
     question: 'What is ten plus five?',
     x: 0,
     y: 0,
+    answered: false,
+    answer: '',
   },
   {
     id: 3,
     question: 'What is life?',
     x: 0,
     y: 0,
+    answered: false,
+    answer: '',
   },
 ])
 
@@ -80,16 +200,10 @@ const modifyNode = (event: MouseEvent) => {
   const [x, y] = d3.pointer(event)
   const node = simulation.find(x, y, deleteRadius)
   if (node) {
-    links.splice(
-      0,
-      links.length,
-      ...links.filter(
-        (link) =>
-          getId(link.source) !== node.id && getId(link.target) !== node.id
-      )
-    )
-    nodes.splice(nodes.indexOf(node), 1)
+    modalActive.value = true
+    selectedNode.value = node
   } else {
+    /*
     const newId = nodes.length + 1
     const node = simulation.find(x, y, linkRadius)
 
@@ -106,6 +220,7 @@ const modifyNode = (event: MouseEvent) => {
         target: newId,
       })
     }
+    */
   }
 }
 
@@ -160,6 +275,8 @@ const linkArc = (d: NodeLink) => {
 }
 
 onMounted(() => {
+  while (graph.value === null) {}
+  console.log(JSON.stringify(graph.value))
   const container = d3.select(graph.value)
 
   const svg = container.append('svg').attr('width', 1000).attr('height', 500)
@@ -209,28 +326,11 @@ onMounted(() => {
     .attr('stroke', 'white')
     .attr('stroke-width', 3)
 
-  const mouseLink = svg
-    .append('g')
-    .append('line')
-    .attr('display', 'none')
-    .attr('stroke', 'red')
-
   simulation.on('tick', () => {
     link.attr('d', (d: d3.SimulationLinkDatum<Node>) => linkArc(d as NodeLink))
     node.attr('transform', (d) => `translate(${d.x},${d.y})`)
 
     const closest = simulation.find(mouseX, mouseY, linkRadius)
-
-    if (closest) {
-      mouseLink
-        .attr('display', 'true')
-        .attr('x1', mouseX)
-        .attr('y1', mouseY)
-        .attr('x2', closest.x)
-        .attr('y2', closest.y)
-    } else {
-      mouseLink.attr('display', 'none')
-    }
   })
 
   const resize = () => {
@@ -250,6 +350,8 @@ onMounted(() => {
   resize()
   d3.select(window).on(`resize.${container.attr('id')}`, resize)
 })
+
+const page = ref(1)
 </script>
 
 <style>
@@ -278,4 +380,44 @@ html {
   top: 0;
   left: 0;
 }
+
+.page {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
+.body {
+  display: flex;
+  height: 100%;
+  width: 100vw;
+}
+
+.side-panel {
+  display: flex;
+  flex-direction: column;
+}
+.main-panel {
+  display: flex;
+}
+
+.whole-screen {
+  display: flex;
+}
+
+.enter-questions {
+  display: flex;
+  flex-direction: column;
+}
+
+.enter-question {
+  justify-content: center;
+  align-content: center;
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+}
 </style>
+
