@@ -16,11 +16,12 @@ export default defineNuxtConfig({
   modules: [
     // https://go.nuxtjs.dev/buefy
     'nuxt-buefy',
+    ['@nuxtjs/proxy', ['http://localhost:5000/api']],
     // https://go.nuxtjs.dev/axios
     [
       '@nuxtjs/axios',
       {
-        baseURL: '/',
+        baseURL: 'http://localhost:5000/',
       },
     ],
     // https://go.nuxtjs.dev/pwa

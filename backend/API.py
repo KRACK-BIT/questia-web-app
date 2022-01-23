@@ -1,4 +1,4 @@
-from flask import Flask, jsonify
+from flask import Flask, Blueprint, jsonify
 from flask_cors import CORS
 from QuestionNetwork import QuestionNetwork
 
@@ -29,27 +29,35 @@ app = Flask(__name__)
 app.config.from_object(__name__)
 
 # enable CORS
-CORS(app, resources={r'/*': {'origins': '*'}})
+CORS(app, resources={r"/*": {"origins": "*"}})
+
+bp = Blueprint("api", __name__)
 
 # get questions tree
-@app.route('/get-tree', methods=['GET'])
+@bp.route("/get-tree", methods=["GET"])
 def get_tree():
-  return jsonify(question_network.network_to_JSON_format()) 
+    return jsonify(question_network.network_to_JSON_format())
 
-@app.route('/get-potential-link', methods=['POST'])
+
+@bp.route("/get-potential-link", methods=["POST"])
 def get_potential_link(request):
-  json = request.get_json()
-  question_network.get_potential_link(json["text"])
+    json = request.get_json()
+    question_network.get_potential_link(json["text"])
 
-@app.route('/confirm-link', methods=['PUT'])
+
+@bp.route("/confirm-link", methods=["PUT"])
 def confirm_link(request):
-  json = request.get_json() 
-  question_network.add_question(json["text"], json["link"])
+    json = request.get_json()
+    question_network.add_question(json["text"], json["link"])
 
-@app.route('/vote-for-question', methods=['PUT'])
-def vote_for_question(request): 
-  json = request.get_json()
-  question_network.upvote_question(json["question_id"])
 
-if __name__ == '__main__':
+@bp.route("/vote-for-question", methods=["PUT"])
+def vote_for_question(request):
+    json = request.get_json()
+    question_network.upvote_question(json["question_id"])
+
+
+app.register_blueprint(bp, url_prefix="/api")
+
+if __name__ == "__main__":
     app.run()
