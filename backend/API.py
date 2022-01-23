@@ -1,9 +1,9 @@
-from flask import Flask, Blueprint, jsonify
+from flask import Flask, Blueprint, jsonify, request
 from flask_cors import CORS
 from QuestionNetwork import QuestionNetwork
 
 # configuration
-DEBUG = True  
+DEBUG = True
 
 
 head = "Forces"
@@ -40,19 +40,21 @@ def get_tree():
 
 
 @bp.route("/get-potential-link", methods=["POST"])
-def get_potential_link(request):
+def get_potential_link():
     json = request.get_json()
-    question_network.get_potential_link(json["text"])
+    id = question_network.get_potential_link(json["text"])
+    return jsonify({"id": id})
 
 
 @bp.route("/confirm-link", methods=["PUT"])
-def confirm_link(request):
+def confirm_link():
     json = request.get_json()
     question_network.add_question(json["text"], json["link"])
+    return "success"
 
 
 @bp.route("/vote-for-question", methods=["PUT"])
-def vote_for_question(request):
+def vote_for_question():
     json = request.get_json()
     question_network.upvote_question(json["question_id"])
 
