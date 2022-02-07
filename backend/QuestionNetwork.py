@@ -6,7 +6,7 @@ from Question import Question
 
 class QuestionNetwork:
     def __init__(self, head, children):
-        self.current_id = 5
+        self.current_id = 0
         self.keyword_matcher = KeywordMatch()
         self.head = self.text_to_topic_tree_object(head, 0, False)
         self.head.add_child_list(
@@ -15,7 +15,7 @@ class QuestionNetwork:
         self.all_questions = {
             child.value.id: child.value for child in self.head.children
         }
-        self.all_questions[self.head.value.id] = self.head
+        self.all_questions[self.head.value.id] = self.head.value
 
     def text_to_topic_tree_object(self, text: str, level: int, is_head) -> Tree:
         topic = Topic(self.current_id, text)
@@ -35,6 +35,7 @@ class QuestionNetwork:
         def recursive_search(node, connections):
             for child in node.children:
                 connections.append({"source": node.value.id, "target": child.value.id})
+                recursive_search(child, connections)
 
         connections = []
         recursive_search(self.head, connections)
@@ -42,12 +43,7 @@ class QuestionNetwork:
         return {
             "links": connections,
             "nodes": [
-                *[
-                    node.parent.to_JSON_format()
-                    for node in self.all_questions.values()
-                    if node.parent
-                ],
-                self.head.to_JSON_format(),
+                node.parent.to_JSON_format() for node in self.all_questions.values()
             ],
         }
 
@@ -73,13 +69,12 @@ class QuestionNetwork:
             return self.head.value.id
 
     def upvote_question(self, question_id):
-        self.all_questions[question_id] += 1
+        self.all_questions[question_id].votes += 1
 
     def add_question(self, text, link_id):
-        link_val = self.all_questions[link_id]
-        link_node = link_val.value
-        x = self.text_to_question_tree_object(text, link_val.level + 1, link_val)
-        link_val.add_child(x)
+        link_node = self.all_questions[link_id].parent
+        x = self.text_to_question_tree_object(text, link_node.level + 1, link_node)
+        link_node.add_child(x)
         self.all_questions[x.value.id] = x.value
 
     def pprint(self):
