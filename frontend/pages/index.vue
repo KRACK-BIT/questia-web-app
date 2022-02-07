@@ -386,7 +386,7 @@ const fetchState = async () => {
 }
 
 onMounted(async () => {
-  window.setInterval(fetchState, 4000)
+  window.setInterval(fetchState, 500)
   await fetchState()
 })
 
