@@ -1,5 +1,5 @@
 <template>
-  <div class="page">
+  <div>
     <b-navbar style="background-color: #765ad8">
       <template #brand>
         <b-navbar-item>
@@ -9,100 +9,102 @@
       </template>
     </b-navbar>
     <div class="body">
-      <div class="side-panel">
-        <b-sidebar position="static" open type="is-light">
-          <div class="p-4">
-            <b-menu class="menu">
-              <b-menu-list>
-                <b-menu-item
-                  label="Submit question"
-                  @click="() => (page = 1)"
-                  :active="page === 1"
-                />
-                <b-menu-item
-                  label="View questions"
-                  @click="() => (page = 2)"
-                  :active="page === 2"
-                />
-              </b-menu-list>
-            </b-menu>
-          </div>
-        </b-sidebar>
-      </div>
-      <div v-if="page === 1" class="enter-question">
-        <div class="section">
-          <div style="text-align: center; margin: 15px">
-            <b-field label="Question">
-              <b-input v-model="questionInput"></b-input>
-            </b-field>
-          </div>
-          <div style="margin: 15px">
-            <b-field>
-              <b-button @click="submitQuestion">Submit Question</b-button>
-            </b-field>
-          </div>
-          <div style="margin: 15px">
-            <p v-if="isLink === 1">
-              This question looks very similar to: {{ linkQuestion }}. Is your
-              question separate, linked or a duplicate?
-            </p>
-          </div>
-          <div v-if="isLink" style="margin: 15px">
-            <b-field>
-              <b-button>Separate</b-button>
-              <b-button>Linked</b-button>
-              <b-button>Duplicate</b-button>
-            </b-field>
-          </div>
+      <div class="box my-4 mx-2 ml-4 column is-2">
+        <div class="p-2">
+          <b-menu class="menu">
+            <b-menu-list>
+              <b-menu-item
+                label="Submit question"
+                @click="() => (page = 1)"
+                :active="page === 1"
+              />
+              <b-menu-item
+                label="View questions"
+                @click="() => (page = 2)"
+                :active="page === 2"
+              />
+            </b-menu-list>
+          </b-menu>
         </div>
       </div>
-      <div v-show="page === 2" class="view-questions">
+      <div class="box my-4 mx-2 mr-4 column" style="overflow: hidden">
+        <div v-if="page === 1" class="enter-question">
+          <div class="container p-4">
+            <div class="columns is-centered">
+              <div class="column is-3">
+                <b-field label="Question">
+                  <b-input v-model="questionInput"></b-input>
+                </b-field>
+                <b-field>
+                  <b-button @click="submitQuestion">Submit Question</b-button>
+                </b-field>
+                <div style="margin: 15px">
+                  <p v-if="isLink === 1">
+                    This question looks very similar to: {{ linkQuestion }}. Is
+                    your question separate, linked or a duplicate?
+                  </p>
+                </div>
+                <div v-if="isLink" style="margin: 15px">
+                  <b-field>
+                    <b-button>Separate</b-button>
+                    <b-button>Linked</b-button>
+                    <b-button>Duplicate</b-button>
+                  </b-field>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
         <div
-          class="whole-screen"
-          ref="graph"
-          @click="modifyNode"
-          @mousemove="mouseMove"
-        />
-        <b-modal v-if="isTeacher" v-model="modalActive">
-          <modal-form>
-            <form action="">
-              <div class="modal-card" style="width: auto">
-                <header
-                  class="modal-card-head"
-                  style="display: flex; flex-direction: column"
-                >
-                  <div>
-                    <p class="modal-card-title" style="margin: 15px">
-                      Answer Question:
-                    </p>
-                    <b-field>
-                      <b-input> </b-input>
-                    </b-field>
-                  </div>
-                  <b-button
-                    type="button"
-                    style="margin: 10px"
-                    @click="answerQuestion"
-                    >Submit Answer</b-button
+          class="view-questions fill"
+          :style="{ visibility: page === 2 ? 'visible' : 'hidden' }"
+        >
+          <div
+            class="fill"
+            ref="graph"
+            @click="modifyNode"
+            @mousemove="mouseMove"
+          />
+          <b-modal v-if="isTeacher" v-model="modalActive">
+            <modal-form>
+              <form action="">
+                <div class="modal-card" style="width: auto">
+                  <header
+                    class="modal-card-head"
+                    style="display: flex; flex-direction: column"
                   >
-                </header>
-              </div>
-            </form>
-          </modal-form>
-        </b-modal>
-        <b-modal v-if="!isTeacher" v-model="modalActive">
-          <modal-form>
-            <form action="">
-              <div class="modal-card" style="width: auto">
-                <header class="modal-card-head">
-                  <p class="modal-card-title">Answer: {{}}</p>
-                </header>
-              </div>
-            </form>
-          </modal-form>
-        </b-modal>
+                    <div>
+                      <p class="modal-card-title" style="margin: 15px">
+                        Answer Question:
+                      </p>
+                      <b-field>
+                        <b-input> </b-input>
+                      </b-field>
+                    </div>
+                    <b-button
+                      type="button"
+                      style="margin: 10px"
+                      @click="answerQuestion"
+                      >Submit Answer</b-button
+                    >
+                  </header>
+                </div>
+              </form>
+            </modal-form>
+          </b-modal>
+          <b-modal v-if="!isTeacher" v-model="modalActive">
+            <modal-form>
+              <form action="">
+                <div class="modal-card" style="width: auto">
+                  <header class="modal-card-head">
+                    <p class="modal-card-title">Answer: {{}}</p>
+                  </header>
+                </div>
+              </form>
+            </modal-form>
+          </b-modal>
+        </div>
       </div>
-      <div v-if="page === 3" class="view-transcript"></div>
     </div>
   </div>
 </template>
@@ -215,7 +217,7 @@ const updateNodes = () => {
         .append('circle')
         .attr('stroke', 'white')
         .attr('stroke-width', 1.5)
-        .attr('r', 4)
+        .attr('r', 8)
 
       output
         .append('text')
@@ -263,9 +265,10 @@ onMounted(() => {
 
   simulation = forceSimulation(nodes)
     .force('link', linkForce)
-    .force('charge', d3.forceManyBody().strength(-400))
+    .force('charge', d3.forceManyBody().strength(-3000))
     .force('x', d3.forceX())
     .force('y', d3.forceY())
+    .velocityDecay(0.8)
 
   link = svg
     .append('g')
@@ -274,7 +277,6 @@ onMounted(() => {
     .selectAll('path')
     .data(links)
     .join('path')
-    .attr('stroke', 'black')
 
   node = svg
     .append('g')
@@ -285,33 +287,17 @@ onMounted(() => {
     .data(nodes)
     .join('g')
 
-  node
-    .append('circle')
-    .attr('stroke', 'white')
-    .attr('stroke-width', 1.5)
-    .attr('r', 4)
-
-  node
-    .append('text')
-    .attr('x', 8)
-    .attr('y', '0.31em')
-    .text((d) => d.text)
-    .clone(true)
-    .lower()
-    .attr('fill', 'none')
-    .attr('stroke', 'white')
-    .attr('stroke-width', 3)
-
   simulation.on('tick', () => {
     link.attr('d', (d: d3.SimulationLinkDatum<Node>) => linkArc(d as NodeLink))
     node.attr('transform', (d) => `translate(${d.x},${d.y})`)
 
-    const closest = simulation.find(mouseX, mouseY, linkRadius)
+    // const closest = simulation.find(mouseX, mouseY, linkRadius)
   })
 
   const resize = () => {
     var width = parseInt(container.style('width'))
     var height = parseInt(container.style('height'))
+
     svg.attr('width', width)
     svg.attr('height', height)
 
@@ -378,8 +364,6 @@ const submitQuestion = async () => {
   })
   if (id === false) {
   } else {
-    console.log('AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA')
-    console.log(questionInput.value)
     await $axios.$put('/api/confirm-link', {
       text: questionInput.value,
       link: id,
@@ -389,9 +373,9 @@ const submitQuestion = async () => {
 </script>
 
 <style>
-.whole-screen {
-  width: 100vw;
-  height: 100vh;
+.fill {
+  width: 100%;
+  height: 100%;
   overflow: hidden;
 }
 
@@ -399,58 +383,13 @@ html {
   overflow: hidden;
 }
 
-.svg-container {
-  display: inline-block;
-  position: relative;
-  width: 100%;
-  padding-bottom: 100%;
-  vertical-align: top;
-  overflow: hidden;
-}
-
-.svg-content {
-  display: inline-block;
-  position: absolute;
-  top: 0;
-  left: 0;
-}
-
-.page {
-  display: flex;
-  flex-direction: column;
-  height: 100vh;
-}
-
 .body {
   display: flex;
-  height: 100%;
+  height: calc(100vh - 64px);
   width: 100vw;
 }
 
-.side-panel {
-  display: flex;
-  flex-direction: column;
-}
 .main-panel {
   display: flex;
-}
-
-.whole-screen {
-  display: flex;
-}
-
-.enter-questions {
-  display: flex;
-  flex-direction: column;
-}
-
-.enter-question {
-  justify-content: center;
-  align-content: center;
-}
-
-.section {
-  display: flex;
-  flex-direction: column;
 }
 </style>
