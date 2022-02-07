@@ -1,10 +1,18 @@
 <template>
   <div>
-    <b-navbar type="is-primary" :mobile-burger="false">
+    <b-navbar type="is-primary">
       <template #brand>
         <b-navbar-item>
-          <img src="/icon.png" style="margin: 10px" />
+          <img src="/icon.png" class="mt-1 mr-2" />
           <h1 class="title" style="color: white"><b>Questia</b></h1>
+        </b-navbar-item>
+      </template>
+      <template #start>
+        <b-navbar-item @click="() => (isTeacher = true)">
+          Teacher view
+        </b-navbar-item>
+        <b-navbar-item @click="() => (isTeacher = false)">
+          Student view
         </b-navbar-item>
       </template>
     </b-navbar>
