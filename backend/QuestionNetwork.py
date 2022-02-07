@@ -48,25 +48,23 @@ class QuestionNetwork:
         }
 
     def get_potential_link(self, text):
-        def search_for_link(node):
-            if not node:
-                return False
+        highest_score = max(
+            (
+                (node, score)
+                for (node, score) in (
+                    (node, self.keyword_matcher.find_keyword_match(text, node.text))
+                    for node in self.all_questions.values()
+                )
+                if score is not None
+            ),
+            key=lambda pair: pair[1],
+            default=None,
+        )
 
-            value = node.value
-            if self.keyword_matcher.find_keyword_match(text, value.text):
-                return value.id
-            else:
-                for child in node.children:
-                    search_result = search_for_link(child)
-                    if search_result:
-                        return search_result
-                return False
-
-        x = search_for_link(self.head)
-        if x:
-            return x
-        else:
+        if highest_score is None:
             return self.head.value.id
+
+        return highest_score[0].id
 
     def upvote_question(self, question_id):
         self.all_questions[question_id].votes += 1
