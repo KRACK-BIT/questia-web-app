@@ -43,7 +43,12 @@ def get_tree():
 def get_potential_link():
     json = request.get_json()
     id = question_network.get_potential_link(json["text"])
-    return jsonify({"id": id})
+    text = (
+        question_network.all_questions[id].text
+        if id in question_network.all_questions
+        else ""
+    )
+    return jsonify({"id": id, "text": text})
 
 
 @bp.route("/confirm-link", methods=["PUT"])

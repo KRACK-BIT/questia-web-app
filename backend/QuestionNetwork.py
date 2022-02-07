@@ -62,7 +62,7 @@ class QuestionNetwork:
         )
 
         if highest_score is None:
-            return self.head.value.id
+            return -1
 
         return highest_score[0].id
 

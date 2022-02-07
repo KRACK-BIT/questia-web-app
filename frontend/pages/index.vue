@@ -31,34 +31,63 @@
                 @click="() => (page = 2)"
                 :active="page === 2"
               />
+              <b-menu-item label="Transcript" disabled />
             </b-menu-list>
           </b-menu>
         </div>
       </div>
       <div class="box my-4 mx-2 mr-4 column" style="overflow: hidden">
         <div v-if="page === 2" class="enter-question">
-          <div class="container p-4">
-            <div class="columns is-centered">
-              <div class="column is-3">
+          <div class="container p-5">
+            <div class="columns">
+              <div class="column is-4">
+                <h2 class="title">Submit question</h2>
                 <b-field label="Question">
-                  <b-input v-model="questionInput"></b-input>
+                  <b-input
+                    v-model="questionInput"
+                    :disabled="suggestionExists"
+                  ></b-input>
                 </b-field>
                 <b-field>
-                  <b-button @click="submitQuestion">Submit Question</b-button>
+                  <b-button
+                    @click="suggestQuestion"
+                    :disabled="suggestionExists"
+                  >
+                    Submit Question
+                  </b-button>
                 </b-field>
-                <div style="margin: 15px">
-                  <p v-if="isLink === 1">
-                    This question looks very similar to: {{ linkQuestion }}. Is
-                    your question separate, linked or a duplicate?
-                  </p>
-                </div>
-                <div v-if="isLink" style="margin: 15px">
-                  <b-field>
-                    <b-button>Separate</b-button>
-                    <b-button>Linked</b-button>
-                    <b-button>Duplicate</b-button>
-                  </b-field>
-                </div>
+                <b-notification
+                  type="is-primary"
+                  :closable="false"
+                  :active="suggestionExists"
+                >
+                  <div class="block">
+                    <p>This question looks very similar to:</p>
+                    <p>
+                      <em>
+                        {{ suggestionText }}
+                      </em>
+                    </p>
+                    <p>Is your question separate, linked or a duplicate?</p>
+                  </div>
+                  <div class="buttons">
+                    <b-button
+                      type="is-primary is-light"
+                      @click="selectSeparate"
+                    >
+                      Separate
+                    </b-button>
+                    <b-button type="is-primary is-light" @click="selectLinked">
+                      Linked
+                    </b-button>
+                    <b-button
+                      type="is-primary is-light"
+                      @click="selectDuplicate"
+                    >
+                      Duplicate
+                    </b-button>
+                  </div>
+                </b-notification>
               </div>
             </div>
           </div>
@@ -87,7 +116,7 @@
                         Answer Question:
                       </p>
                       <b-field>
-                        <b-input> </b-input>
+                        <b-input></b-input>
                       </b-field>
                     </div>
                     <b-button
@@ -130,9 +159,7 @@ const linkRadius = 100
 const deleteRadius = 20
 const modalActive = ref(false)
 const selectedNode = ref<Node | null>(null)
-const isLink = ref(0)
-const linkQuestion = ref('What are forces?')
-const isTeacher = ref(1)
+const isTeacher = ref(true)
 
 interface ServerNode {
   id: number
@@ -361,22 +388,54 @@ const fetchState = async () => {
 }
 
 onMounted(async () => {
-  window.setInterval(fetchState, 500)
+  window.setInterval(fetchState, 4000)
   await fetchState()
 })
 
-const questionInput = ref('')
-const submitQuestion = async () => {
-  const { id } = await $axios.$post('/api/get-potential-link', {
+const questionInput = ref('What are forces?')
+const suggestion = ref<number | null>(null)
+const suggestionText = ref('')
+const suggestionExists = computed(() => suggestion.value !== null)
+
+const submitQuestion = async (link: number) => {
+  await $axios.$put('/api/confirm-link', {
+    text: questionInput.value,
+    link,
+  })
+}
+
+const suggestQuestion = async () => {
+  if (suggestionExists.value) {
+    return
+  }
+
+  const { id, text } = await $axios.$post('/api/get-potential-link', {
     text: questionInput.value,
   })
-  if (id === false) {
+
+  if (id !== -1) {
+    suggestion.value = id
+    suggestionText.value = text
   } else {
-    await $axios.$put('/api/confirm-link', {
-      text: questionInput.value,
-      link: id,
-    })
+    await submitQuestion(0)
+    questionInput.value = ''
   }
+}
+
+const selectSeparate = async () => {
+  await submitQuestion(0)
+  questionInput.value = ''
+  suggestion.value = null
+}
+
+const selectLinked = async () => {
+  await submitQuestion(suggestion.value as number)
+  questionInput.value = ''
+  suggestion.value = null
+}
+
+const selectDuplicate = () => {
+  suggestion.value = null
 }
 </script>
 
@@ -393,8 +452,9 @@ html {
 
 .body {
   display: flex;
-  height: calc(100vh - 64px);
+  height: calc(100vh - 52px);
   width: 100vw;
+  background-color: #f8f8f8;
 }
 
 .main-panel {
