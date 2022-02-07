@@ -1,6 +1,6 @@
 <template>
   <div>
-    <b-navbar style="background-color: #765ad8">
+    <b-navbar type="is-primary" :mobile-burger="false">
       <template #brand>
         <b-navbar-item>
           <img src="/icon.png" style="margin: 10px" />
@@ -14,12 +14,12 @@
           <b-menu class="menu">
             <b-menu-list>
               <b-menu-item
-                label="Submit question"
+                label="View questions"
                 @click="() => (page = 1)"
                 :active="page === 1"
               />
               <b-menu-item
-                label="View questions"
+                label="Submit question"
                 @click="() => (page = 2)"
                 :active="page === 2"
               />
@@ -28,7 +28,7 @@
         </div>
       </div>
       <div class="box my-4 mx-2 mr-4 column" style="overflow: hidden">
-        <div v-if="page === 1" class="enter-question">
+        <div v-if="page === 2" class="enter-question">
           <div class="container p-4">
             <div class="columns is-centered">
               <div class="column is-3">
@@ -55,9 +55,10 @@
             </div>
           </div>
         </div>
+
         <div
           class="view-questions fill"
-          :style="{ visibility: page === 2 ? 'visible' : 'hidden' }"
+          :style="{ visibility: page === 1 ? 'visible' : 'hidden' }"
         >
           <div
             class="fill"
@@ -254,7 +255,6 @@ const linkArc = (d: NodeLink) => {
 
 onMounted(() => {
   while (graph.value === null) {}
-  console.log(JSON.stringify(graph.value))
   const container = d3.select(graph.value)
 
   const svg = container.append('svg').attr('width', 1000).attr('height', 500)
