@@ -4,7 +4,12 @@
       <template #brand>
         <b-navbar-item>
           <img src="/icon.png" class="mt-1 mr-2" />
-          <h1 class="title" style="color: white"><b>Questia</b></h1>
+          <h1 class="title" style="color: white">
+            <b>Questia</b>
+            <span style="font-weight: lighter; font-size: 1.5rem">
+              {{ isTeacher ? 'Teacher' : 'Student' }}
+            </span>
+          </h1>
         </b-navbar-item>
       </template>
       <template #start>
@@ -103,47 +108,37 @@
             @click="modifyNode"
             @mousemove="mouseMove"
           />
-          <b-modal v-if="isTeacher" v-model="modalActive">
-            <modal-form>
-              <form action="">
-                <div class="modal-card" style="width: auto">
-                  <header
-                    class="modal-card-head"
-                    style="display: flex; flex-direction: column"
-                  >
-                    <div>
-                      <p class="modal-card-title" style="margin: 15px">
-                        Answer Question:
-                      </p>
-                      <b-field>
-                        <b-input></b-input>
-                      </b-field>
-                    </div>
-                    <b-button
-                      type="button"
-                      style="margin: 10px"
-                      @click="answerQuestion"
-                      >Submit Answer</b-button
-                    >
-                  </header>
-                </div>
-              </form>
-            </modal-form>
-          </b-modal>
-          <b-modal v-if="!isTeacher" v-model="modalActive">
-            <modal-form>
-              <form action="">
-                <div class="modal-card" style="width: auto">
-                  <header class="modal-card-head">
-                    <p class="modal-card-title">Answer: {{}}</p>
-                  </header>
-                </div>
-              </form>
-            </modal-form>
-          </b-modal>
         </div>
       </div>
     </div>
+    <b-modal v-model="modalActive" :width="640" :has-modal-card="isTeacher">
+      <div v-if="isTeacher" class="modal-card" style="width: auto">
+        <form v-on:submit.prevent>
+          <header class="modal-card-head">
+            <p class="modal-card-title">Answer question</p>
+          </header>
+          <section class="modal-card-body">
+            <b-field label="Answer">
+              <b-input />
+            </b-field>
+          </section>
+          <footer class="modal-card-foot">
+            <b-button
+              type="button"
+              tag="input"
+              native-type="submit"
+              @click="answerQuestion"
+              disabled
+            >
+              Submit Answer
+            </b-button>
+          </footer>
+        </form>
+      </div>
+      <div v-else class="box">
+        <p>Question currently unanswered</p>
+      </div>
+    </b-modal>
   </div>
 </template>
 
@@ -164,7 +159,7 @@ const isTeacher = ref(true)
 interface ServerNode {
   id: number
   text: string
-  topic: string
+  type: 'Question' | 'Topic'
 }
 
 interface Node extends d3.SimulationNodeDatum {
@@ -172,6 +167,7 @@ interface Node extends d3.SimulationNodeDatum {
   text: string
   x: number
   y: number
+  type: 'Question' | 'Topic'
 }
 
 interface NodeLink extends d3.SimulationLinkDatum<Node> {
@@ -213,7 +209,7 @@ const getId = (nodeRepresentation: number | string | Node) =>
 const modifyNode = (event: MouseEvent) => {
   const [x, y] = d3.pointer(event)
   const node = simulation.find(x, y, deleteRadius)
-  if (node) {
+  if (node && node.type === 'Question') {
     modalActive.value = true
     selectedNode.value = node
   } else {
@@ -254,11 +250,12 @@ const updateNodes = () => {
         .attr('stroke', 'white')
         .attr('stroke-width', 1.5)
         .attr('r', 8)
+        .attr('fill', (d) => (d.type === 'Topic' ? '#4A4A4A' : '#7957D5'))
 
       output
         .append('text')
-        .attr('x', 8)
-        .attr('y', '0.31em')
+        .attr('x', '0.6em')
+        .attr('y', '0.7em')
         .text((d) => d.text)
         .clone(true)
         .lower()
@@ -359,12 +356,13 @@ const getLinksAndNodes = async () => {
     links: d3.SimulationLinkDatum<Node>[]
     nodes: ServerNode[]
   }
-  const nodes = serverNodes.map(({ id, text }) => {
+  const nodes = serverNodes.map(({ id, text, type }) => {
     return {
       x: 0,
       y: 0,
       id,
       text,
+      type,
     }
   })
   return { links, nodes }
