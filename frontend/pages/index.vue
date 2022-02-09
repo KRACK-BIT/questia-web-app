@@ -1,109 +1,147 @@
 <template>
-  <div class="page">
-    <b-navbar style="background-color: #765ad8">
+  <div>
+    <b-navbar type="is-primary">
       <template #brand>
         <b-navbar-item>
-          <img src="/icon.png" style="margin: 10px" />
-          <h1 class="title" style="color: white"><b>Questia</b></h1>
+          <img src="/icon.png" class="mt-1 mr-2" />
+          <h1 class="title" style="color: white">
+            <b>Questia</b>
+            <span style="font-weight: lighter; font-size: 1.5rem">
+              {{ isTeacher ? 'Teacher' : 'Student' }}
+            </span>
+          </h1>
+        </b-navbar-item>
+      </template>
+      <template #start>
+        <b-navbar-item @click="() => (isTeacher = true)">
+          Teacher view
+        </b-navbar-item>
+        <b-navbar-item @click="() => (isTeacher = false)">
+          Student view
         </b-navbar-item>
       </template>
     </b-navbar>
     <div class="body">
-      <div class="side-panel">
-        <b-sidebar position="static" open type="is-light">
-          <div class="p-4">
-            <b-menu class="menu">
-              <b-menu-list>
-                <b-menu-item
-                  label="Submit question"
-                  @click="() => (page = 1)"
-                  :active="page === 1"
-                />
-                <b-menu-item
-                  label="View questions"
-                  @click="() => (page = 2)"
-                  :active="page === 2"
-                />
-              </b-menu-list>
-            </b-menu>
-          </div>
-        </b-sidebar>
-      </div>
-      <div v-if="page === 1" class="enter-question">
-        <div class="section">
-          <div style="text-align: center; margin: 15px">
-            <b-field label="Question">
-              <b-input v-model="questionInput"></b-input>
-            </b-field>
-          </div>
-          <div style="margin: 15px">
-            <b-field>
-              <b-button @click="submitQuestion">Submit Question</b-button>
-            </b-field>
-          </div>
-          <div style="margin: 15px">
-            <p v-if="isLink === 1">
-              This question looks very similar to: {{ linkQuestion }}. Is your
-              question separate, linked or a duplicate?
-            </p>
-          </div>
-          <div v-if="isLink" style="margin: 15px">
-            <b-field>
-              <b-button>Separate</b-button>
-              <b-button>Linked</b-button>
-              <b-button>Duplicate</b-button>
-            </b-field>
-          </div>
+      <div
+        class="box my-4 mx-2 ml-4 column is-2"
+        v-if="$route.hash !== '#view' && $route.hash !== '#submit'"
+      >
+        <div class="p-2">
+          <b-menu class="menu">
+            <b-menu-list>
+              <b-menu-item
+                label="View questions"
+                @click="() => (page = 1)"
+                :active="page === 1"
+              />
+              <b-menu-item
+                label="Submit question"
+                @click="() => (page = 2)"
+                :active="page === 2"
+              />
+              <b-menu-item label="Transcript" disabled />
+            </b-menu-list>
+          </b-menu>
         </div>
       </div>
-      <div v-show="page === 2" class="view-questions">
-        <div
-          class="whole-screen"
-          ref="graph"
-          @click="modifyNode"
-          @mousemove="mouseMove"
-        />
-        <b-modal v-if="isTeacher" v-model="modalActive">
-          <modal-form>
-            <form action="">
-              <div class="modal-card" style="width: auto">
-                <header
-                  class="modal-card-head"
-                  style="display: flex; flex-direction: column"
-                >
-                  <div>
-                    <p class="modal-card-title" style="margin: 15px">
-                      Answer Question:
-                    </p>
-                    <b-field>
-                      <b-input> </b-input>
-                    </b-field>
-                  </div>
+      <div class="box my-4 mx-2 mr-4 column" style="overflow: hidden">
+        <div v-if="page === 2" class="enter-question">
+          <div class="container p-5">
+            <div class="columns">
+              <div class="column is-4">
+                <h2 class="title">Submit question</h2>
+                <b-field label="Question">
+                  <b-input
+                    v-model="questionInput"
+                    :disabled="suggestionExists"
+                  ></b-input>
+                </b-field>
+                <b-field>
                   <b-button
-                    type="button"
-                    style="margin: 10px"
-                    @click="answerQuestion"
-                    >Submit Answer</b-button
+                    @click="suggestQuestion"
+                    :disabled="suggestionExists"
                   >
-                </header>
+                    Submit Question
+                  </b-button>
+                </b-field>
+                <b-notification
+                  type="is-primary"
+                  :closable="false"
+                  :active="suggestionExists"
+                >
+                  <div class="block">
+                    <p>This question looks very similar to:</p>
+                    <p>
+                      <em>
+                        {{ suggestionText }}
+                      </em>
+                    </p>
+                    <p>Is your question separate, linked or a duplicate?</p>
+                  </div>
+                  <div class="buttons">
+                    <b-button
+                      type="is-primary is-light"
+                      @click="selectSeparate"
+                    >
+                      Separate
+                    </b-button>
+                    <b-button type="is-primary is-light" @click="selectLinked">
+                      Linked
+                    </b-button>
+                    <b-button
+                      type="is-primary is-light"
+                      @click="selectDuplicate"
+                    >
+                      Duplicate
+                    </b-button>
+                  </div>
+                </b-notification>
               </div>
-            </form>
-          </modal-form>
-        </b-modal>
-        <b-modal v-if="!isTeacher" v-model="modalActive">
-          <modal-form>
-            <form action="">
-              <div class="modal-card" style="width: auto">
-                <header class="modal-card-head">
-                  <p class="modal-card-title">Answer: {{}}</p>
-                </header>
-              </div>
-            </form>
-          </modal-form>
-        </b-modal>
+            </div>
+          </div>
+        </div>
+
+        <div
+          class="view-questions fill"
+          :style="{ visibility: page === 1 ? 'visible' : 'hidden' }"
+        >
+          <div
+            class="fill"
+            ref="graph"
+            @click="modifyNode"
+            @mousemove="mouseMove"
+          />
+        </div>
       </div>
-      <div v-if="page === 3" class="view-transcript"></div>
     </div>
+    <b-modal v-model="modalActive" :width="640" :has-modal-card="isTeacher">
+      <div v-if="isTeacher" class="modal-card" style="width: auto">
+        <form v-on:submit.prevent>
+          <header class="modal-card-head">
+            <p class="modal-card-title">Answer question</p>
+          </header>
+          <section class="modal-card-body">
+            <b-field label="Answer">
+              <b-input />
+            </b-field>
+          </section>
+          <footer class="modal-card-foot">
+            <b-button
+              type="button"
+              tag="input"
+              native-type="submit"
+              @click="answerQuestion"
+              disabled
+            >
+              Submit Answer
+            </b-button>
+          </footer>
+        </form>
+      </div>
+      <div v-else class="box">
+        <p>Question currently unanswered</p>
+      </div>
+    </b-modal>
   </div>
 </template>
 
@@ -119,14 +157,12 @@ const linkRadius = 100
 const deleteRadius = 20
 const modalActive = ref(false)
 const selectedNode = ref<Node | null>(null)
-const isLink = ref(0)
-const linkQuestion = ref('What are forces?')
-const isTeacher = ref(1)
+const isTeacher = ref(true)
 
 interface ServerNode {
   id: number
   text: string
-  topic: string
+  type: 'Question' | 'Topic'
 }
 
 interface Node extends d3.SimulationNodeDatum {
@@ -134,6 +170,7 @@ interface Node extends d3.SimulationNodeDatum {
   text: string
   x: number
   y: number
+  type: 'Question' | 'Topic'
 }
 
 interface NodeLink extends d3.SimulationLinkDatum<Node> {
@@ -175,7 +212,7 @@ const getId = (nodeRepresentation: number | string | Node) =>
 const modifyNode = (event: MouseEvent) => {
   const [x, y] = d3.pointer(event)
   const node = simulation.find(x, y, deleteRadius)
-  if (node) {
+  if (node && node.type === 'Question') {
     modalActive.value = true
     selectedNode.value = node
   } else {
@@ -215,12 +252,13 @@ const updateNodes = () => {
         .append('circle')
         .attr('stroke', 'white')
         .attr('stroke-width', 1.5)
-        .attr('r', 4)
+        .attr('r', 8)
+        .attr('fill', (d) => (d.type === 'Topic' ? '#4A4A4A' : '#7957D5'))
 
       output
         .append('text')
-        .attr('x', 8)
-        .attr('y', '0.31em')
+        .attr('x', '0.6em')
+        .attr('y', '0.7em')
         .text((d) => d.text)
         .clone(true)
         .lower()
@@ -252,7 +290,6 @@ const linkArc = (d: NodeLink) => {
 
 onMounted(() => {
   while (graph.value === null) {}
-  console.log(JSON.stringify(graph.value))
   const container = d3.select(graph.value)
 
   const svg = container.append('svg').attr('width', 1000).attr('height', 500)
@@ -263,9 +300,10 @@ onMounted(() => {
 
   simulation = forceSimulation(nodes)
     .force('link', linkForce)
-    .force('charge', d3.forceManyBody().strength(-400))
+    .force('charge', d3.forceManyBody().strength(-3000))
     .force('x', d3.forceX())
     .force('y', d3.forceY())
+    .velocityDecay(0.8)
 
   link = svg
     .append('g')
@@ -274,7 +312,6 @@ onMounted(() => {
     .selectAll('path')
     .data(links)
     .join('path')
-    .attr('stroke', 'black')
 
   node = svg
     .append('g')
@@ -285,33 +322,17 @@ onMounted(() => {
     .data(nodes)
     .join('g')
 
-  node
-    .append('circle')
-    .attr('stroke', 'white')
-    .attr('stroke-width', 1.5)
-    .attr('r', 4)
-
-  node
-    .append('text')
-    .attr('x', 8)
-    .attr('y', '0.31em')
-    .text((d) => d.text)
-    .clone(true)
-    .lower()
-    .attr('fill', 'none')
-    .attr('stroke', 'white')
-    .attr('stroke-width', 3)
-
   simulation.on('tick', () => {
     link.attr('d', (d: d3.SimulationLinkDatum<Node>) => linkArc(d as NodeLink))
     node.attr('transform', (d) => `translate(${d.x},${d.y})`)
 
-    const closest = simulation.find(mouseX, mouseY, linkRadius)
+    // const closest = simulation.find(mouseX, mouseY, linkRadius)
   })
 
   const resize = () => {
     var width = parseInt(container.style('width'))
     var height = parseInt(container.style('height'))
+
     svg.attr('width', width)
     svg.attr('height', height)
 
@@ -327,7 +348,8 @@ onMounted(() => {
   d3.select(window).on(`resize.${container.attr('id')}`, resize)
 })
 
-const page = ref(1)
+const route = useRoute()
+const page = ref(route.hash === '#submit' ? 2 : 1)
 
 const $axios = useNuxtApp().$axios as NuxtAxiosInstance
 
@@ -338,12 +360,13 @@ const getLinksAndNodes = async () => {
     links: d3.SimulationLinkDatum<Node>[]
     nodes: ServerNode[]
   }
-  const nodes = serverNodes.map(({ id, text }) => {
+  const nodes = serverNodes.map(({ id, text, type }) => {
     return {
       x: 0,
       y: 0,
       id,
       text,
+      type,
     }
   })
   return { links, nodes }
@@ -371,27 +394,57 @@ onMounted(async () => {
   await fetchState()
 })
 
-const questionInput = ref('')
-const submitQuestion = async () => {
-  const { id } = await $axios.$post('/api/get-potential-link', {
+const questionInput = ref('What are forces?')
+const suggestion = ref<number | null>(null)
+const suggestionText = ref('')
+const suggestionExists = computed(() => suggestion.value !== null)
+
+const submitQuestion = async (link: number) => {
+  await $axios.$put('/api/confirm-link', {
+    text: questionInput.value,
+    link,
+  })
+}
+
+const suggestQuestion = async () => {
+  if (suggestionExists.value) {
+    return
+  }
+
+  const { id, text } = await $axios.$post('/api/get-potential-link', {
     text: questionInput.value,
   })
-  if (id === false) {
+
+  if (id !== -1) {
+    suggestion.value = id
+    suggestionText.value = text
   } else {
-    console.log('AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA')
-    console.log(questionInput.value)
-    await $axios.$put('/api/confirm-link', {
-      text: questionInput.value,
-      link: id,
-    })
+    await submitQuestion(0)
+    questionInput.value = ''
   }
+}
+
+const selectSeparate = async () => {
+  await submitQuestion(0)
+  questionInput.value = ''
+  suggestion.value = null
+}
+
+const selectLinked = async () => {
+  await submitQuestion(suggestion.value as number)
+  questionInput.value = ''
+  suggestion.value = null
+}
+
+const selectDuplicate = () => {
+  suggestion.value = null
 }
 </script>
 
 <style>
-.whole-screen {
-  width: 100vw;
-  height: 100vh;
+.fill {
+  width: 100%;
+  height: 100%;
   overflow: hidden;
 }
 
@@ -399,58 +452,14 @@ html {
   overflow: hidden;
 }
 
-.svg-container {
-  display: inline-block;
-  position: relative;
-  width: 100%;
-  padding-bottom: 100%;
-  vertical-align: top;
-  overflow: hidden;
-}
-
-.svg-content {
-  display: inline-block;
-  position: absolute;
-  top: 0;
-  left: 0;
-}
-
-.page {
-  display: flex;
-  flex-direction: column;
-  height: 100vh;
-}
-
 .body {
   display: flex;
-  height: 100%;
+  height: calc(100vh - 52px);
   width: 100vw;
+  background-color: #f8f8f8;
 }
 
-.side-panel {
-  display: flex;
-  flex-direction: column;
-}
 .main-panel {
   display: flex;
-}
-
-.whole-screen {
-  display: flex;
-}
-
-.enter-questions {
-  display: flex;
-  flex-direction: column;
-}
-
-.enter-question {
-  justify-content: center;
-  align-content: center;
-}
-
-.section {
-  display: flex;
-  flex-direction: column;
 }
 </style>

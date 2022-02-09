@@ -9,7 +9,8 @@ export default defineNuxtConfig({
     title: 'Questia',
   },
 
-  loading: undefined,
+  // @ts-ignore-next-line
+  loading: false,
 
   // Auto import components: https://go.nuxtjs.dev/config-components
   components: true,
@@ -42,5 +43,6 @@ export default defineNuxtConfig({
 
   bridge: {
     vite: true,
+    meta: true,
   },
 })
