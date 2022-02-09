@@ -2209,11 +2209,6 @@
   dependencies:
     "@types/node" "*"
 
-"@types/reveal@^4.2.0":
-  version "4.2.0"
-  resolved "https://registry.yarnpkg.com/@types/reveal/-/reveal-4.2.0.tgz#03695a7785fbb0c1050bae85930229bb17effabc"
-  integrity sha512-lhTCUrk8pU/9SWcqbLwCy/AFjCp9S2hcDGoKAIycWGcHujUrDKMXWVkOvbSWk/gohZwwfuxQxucBaqvYAM5DTQ==
-
 "@types/sass-loader@8.0.1":
   version "8.0.1"
   resolved "https://registry.yarnpkg.com/@types/sass-loader/-/sass-loader-8.0.1.tgz#628eb80c30cb34ce622056f9b9a1606a8147dcd0"

@@ -22,7 +22,10 @@
       </template>
     </b-navbar>
     <div class="body">
-      <div class="box my-4 mx-2 ml-4 column is-2">
+      <div
+        class="box my-4 mx-2 ml-4 column is-2"
+        v-if="$route.hash !== '#view' && $route.hash !== '#submit'"
+      >
         <div class="p-2">
           <b-menu class="menu">
             <b-menu-list>
@@ -345,7 +348,8 @@ onMounted(() => {
   d3.select(window).on(`resize.${container.attr('id')}`, resize)
 })
 
-const page = ref(1)
+const route = useRoute()
+const page = ref(route.hash === '#submit' ? 2 : 1)
 
 const $axios = useNuxtApp().$axios as NuxtAxiosInstance
 

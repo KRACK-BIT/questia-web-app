@@ -331,13 +331,12 @@ const submitQuestion = async () => {
   const { id } = await $axios.$post('/api/get-potential-link', {
     text: questionInput.value,
   })
-  if (id === false) {
+  if (id !== -1) {
+    throw new Error('Oh no oh no oh no')
   } else {
-    console.log('AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA')
-    console.log(questionInput.value)
     await $axios.$put('/api/confirm-link', {
       text: questionInput.value,
-      link: id,
+      link: 0,
     })
   }
 }
