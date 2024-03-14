@@ -1,2 +1,6 @@
 flask
 nltk
+
+# TO CHECK
+# flask-cors
+# yake
