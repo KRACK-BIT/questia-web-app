@@ -1,4 +1,4 @@
-from flask import Flask, Blueprint, jsonify, request
+from flask import Blueprint, Flask, jsonify, request
 from flask_cors import CORS
 from QuestionNetwork import QuestionNetwork
 
@@ -32,6 +32,7 @@ app.config.from_object(__name__)
 CORS(app, resources={r"/*": {"origins": "*"}})
 
 bp = Blueprint("api", __name__)
+
 
 # get questions tree
 @bp.route("/get-tree", methods=["GET"])
