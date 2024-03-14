@@ -1,7 +1,7 @@
 from KeywordMatch import KeywordMatch
-from Tree import Tree
-from Topic import Topic
 from Question import Question
+from Topic import Topic
+from Tree import Tree
 
 
 class QuestionNetwork:
@@ -67,7 +67,13 @@ class QuestionNetwork:
         return highest_score[0].id
 
     def upvote_question(self, question_id):
-        self.all_questions[question_id].votes += 1
+        question = self.all_questions[question_id]
+        if isinstance(question, Question):
+            question.votes += 1
+        else:
+            raise TypeError(
+                f"Only Questions can be upvoted, not nodes of type {type(question_id)} - see {question_id=}"
+            )
 
     def add_question(self, text, link_id):
         link_node = self.all_questions[link_id].parent
