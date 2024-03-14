@@ -1,6 +1,4 @@
-from __future__ import annotations
-
-from typing import List
+from typing import List, Self
 
 from Question import Question
 from Topic import Topic
@@ -9,14 +7,14 @@ from Topic import Topic
 class Tree:
     def __init__(self, value: Question | Topic, level: int, parent) -> None:
         self.value: Question | Topic = value
-        self.children: List[Tree] = []
+        self.children: List[Self] = []
         self.level: int = level
         self.parent = parent
 
-    def add_child(self, node: Tree) -> None:
+    def add_child(self, node: Self) -> None:
         self.children.append(node)
 
-    def add_child_list(self, node_list: List[Tree]) -> None:
+    def add_child_list(self, node_list: List[Self]) -> None:
         for node in node_list:
             self.children.append(node)
 
