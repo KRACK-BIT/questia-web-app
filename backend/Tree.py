@@ -1,17 +1,13 @@
 from __future__ import annotations
+
 from typing import List
-from Topic import Topic
+
 from Question import Question
+from Topic import Topic
 
 
 class Tree:
     def __init__(self, value: Question | Topic, level: int, parent) -> None:
-
-        if type(value) is Question:
-            self.type = "Question"
-        else:
-            self.type = "Topic"
-
         self.value: Question | Topic = value
         self.children: List[Tree] = []
         self.level: int = level
@@ -26,7 +22,7 @@ class Tree:
 
     def to_JSON_format(self):
         value = self.value
-        if self.type == "Topic":
+        if isinstance(value, Topic):
             return {"id": value.id, "type": "Topic", "text": value.text}
         else:
             return {
@@ -58,13 +54,13 @@ class Tree:
   """
 
     def pprint(self):
-        if self.type == "Topic":
+        if isinstance(self.value, Topic):
             print(
                 "  " * self.level
-                + f"Type: {self.type} Text: {self.value.text} Level: {self.level}"
+                + f"Type: {type(self.value)} Text: {self.value.text} Level: {self.level}"
             )
         else:
             print(
                 "  " * self.level
-                + f"Type: {self.type} Text: {self.value.text} Level: {self.level} Votes: {self.value.votes}"
+                + f"Type: {type(self.value)} Text: {self.value.text} Level: {self.level} Votes: {self.value.votes}"
             )
