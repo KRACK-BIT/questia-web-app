@@ -32,35 +32,11 @@ class Tree:
                 "size": value.votes,
             }
 
-    """
-  def to_JSON_format(self): # -> Dict[id, text, size, children : Dict[...]]
-    value = self.value
-    children = self.children
-    if self.type == "Topic":
-      return {
-        "type" : "Topic",
-        "id" : value.id,
-        "text" : value.text,
-        "children" : [child.to_JSON_format() for child in children]
-      }
-    else:
-      return {
-        "type" : "Question",
-        "id" : value.id,
-        "text" : value.text,
-        "size" : value.votes,
-        "children" : [child.to_JSON_format() for child in children]
-      }
-  """
-
-    def pprint(self):
-        if isinstance(self.value, Topic):
-            print(
-                "  " * self.level
-                + f"Type: {type(self.value)} Text: {self.value.text} Level: {self.level}"
-            )
-        else:
-            print(
-                "  " * self.level
-                + f"Type: {type(self.value)} Text: {self.value.text} Level: {self.level} Votes: {self.value.votes}"
-            )
+    def __repr__(self):
+        string = "  " * self.level
+        string += (
+            f"Type: {type(self.value)} Text: {self.value.text} Level: {self.level}"
+        )
+        if isinstance(self.value, Question):
+            string += f" Votes: {self.value.votes}"
+        return string
