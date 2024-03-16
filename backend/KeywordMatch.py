@@ -1,5 +1,5 @@
-import yake
 from nltk.stem import PorterStemmer
+from yake import KeywordExtractor
 
 
 class KeywordMatch:
@@ -8,7 +8,7 @@ class KeywordMatch:
         max_ngram_size = 3
         deduplication_threshold = 0.9
         numOfKeywords = 5
-        self.custom_kw_extractor = yake.KeywordExtractor(
+        self.custom_kw_extractor = KeywordExtractor(
             lan=language,
             n=max_ngram_size,
             dedupLim=deduplication_threshold,
